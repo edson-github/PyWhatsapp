@@ -22,10 +22,10 @@ import platform
 
 if platform.system() == 'Darwin':
     # MACOS Path
-    chrome_default_path = os.getcwd() + '/driver/chromedriver'
+    chrome_default_path = f'{os.getcwd()}/driver/chromedriver'
 else:
     # Windows Path
-    chrome_default_path = os.getcwd() + '/driver/chromedriver.exe'
+    chrome_default_path = f'{os.getcwd()}/driver/chromedriver.exe'
 
 parser = argparse.ArgumentParser(description='PyWhatsapp Guide')
 parser.add_argument('--chrome_driver_path', action='store', type=str, default=chrome_default_path,
@@ -67,15 +67,15 @@ def input_contacts():
         if x == 1:
             n = int(input('Enter number of Contacts to add(count)->'))
             print()
-            for i in range(0, n):
+            for _ in range(0, n):
                 inp = str(input("Enter contact name(text)->"))
-                inp = '"' + inp + '"'
+                inp = f'"{inp}"'
                 # print (inp)
                 Contact.append(inp)
         elif x == 2:
             n = int(input('Enter number of unsaved Contacts to add(count)->'))
             print()
-            for i in range(0, n):
+            for _ in range(0, n):
                 # Example use: 919899123456, Don't use: +919899123456
                 # Reference : https://faq.whatsapp.com/en/android/26000030/
                 inp = str(input(
@@ -87,9 +87,9 @@ def input_contacts():
         if choi == "n":
             break
 
-    if len(Contact) != 0:
+    if Contact:
         print("\nSaved contacts entered list->", Contact)
-    if len(unsaved_Contacts) != 0:
+    if unsaved_Contacts:
         print("Unsaved numbers entered list->", unsaved_Contacts)
     input("\nPress ENTER to continue...")
 
@@ -129,7 +129,7 @@ def whatsapp_login(chrome_path, headless):
 def send_message(target):
     global message, wait, browser
     try:
-        x_arg = '//span[contains(@title,' + target + ')]'
+        x_arg = f'//span[contains(@title,{target})]'
         ct = 0
         while ct != 5:
             try:
@@ -221,15 +221,15 @@ def send_files():
     # Attachment Drop Down Menu
     clipButton = browser.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[1]/div[2]/div/div/span')
     clipButton.click()
-    
+
     time.sleep(1)
     # To send a Document(PDF, Word file, PPT)
     # This makes sure that gifs, images can be imported through documents folder and they display
     # properly in whatsapp web.
-    if doc_filename.split('.')[1]=='pdf'or doc_filename.split('.')[1]=='docx'or doc_filename.split('.')[1]=='pptx' :
+    if doc_filename.split('.')[1] in ['pdf', 'docx', 'pptx']:
         try:
             docButton = browser.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[1]/div[2]/div/span/div/div/ul/li[3]/button')
-            
+
             docButton.click()
         except:
             # Check for traceback errors with XML imports
@@ -264,11 +264,11 @@ def import_contacts():
     fp = open("contacts.txt", "r")
     while True:
         line = fp.readline()
-        con = ' '.join(line.split())
-        if con and con.isdigit():
-            unsaved_Contacts.append(int(con))
-        elif con:
-            Contact.append(con)
+        if con := ' '.join(line.split()):
+            if con.isdigit():
+                unsaved_Contacts.append(int(con))
+            else:
+                Contact.append(con)
         if not line:
             break
 
@@ -281,7 +281,7 @@ def sender():
             send_message(i)
             print("Message sent to ", i)
         except Exception as e:
-            print("Msg to {} send Exception {}".format(i, e))
+            print(f"Msg to {i} send Exception {e}")
         if (choice == "yes"):
             try:
                 send_attachment()
@@ -295,7 +295,7 @@ def sender():
     time.sleep(5)
     if len(unsaved_Contacts) > 0:
         for i in unsaved_Contacts:
-            link = "https://web.whatsapp.com/send?phone={}&text&source&data&app_absent".format(i)
+            link = f"https://web.whatsapp.com/send?phone={i}&text&source&data&app_absent"
             # driver  = webdriver.Chrome()
             browser.get(link)
             print("Sending message to", i)
@@ -339,7 +339,7 @@ if __name__ == "__main__":
     if not Contact and not unsaved_Contacts:
         # Append more contact as input to send messages
         input_contacts()
-    if message == None:
+    if message is None:
         # Enter the message you want to send
         input_message()
 
